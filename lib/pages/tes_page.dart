@@ -1,10 +1,14 @@
 import 'package:countdown_progress_indicator/countdown_progress_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:quiz_flutter/models/question_model.dart';
 import 'package:quiz_flutter/pages/result_page.dart';
 
 class TesPage extends StatefulWidget {
-  TesPage({Key? key}) : super(key: key);
+  final QuestionModel questionModel;
+  final String username;
+  TesPage({required this.questionModel, required this.username, Key? key})
+      : super(key: key);
 
   @override
   State<TesPage> createState() => _TesPageState();
@@ -12,12 +16,44 @@ class TesPage extends StatefulWidget {
 
 class _TesPageState extends State<TesPage> {
   final _controller = CountDownController();
+
+  int index = 0;
+  int result = 0;
+  @override
+  void initState() {
+    print('USERNAME : ' + widget.username);
+    print('QUESTIONS : ' + widget.questionModel.data.length.toString());
+    super.initState();
+  }
+
+  void navigate(String optionChar) {
+    setState(() {
+      if (optionChar == (widget.questionModel.data[index].correctOption)) {
+        result++;
+      }
+      index++;
+
+      if (index == widget.questionModel.data.length) {
+        Navigator.of(context)
+            .push(MaterialPageRoute(
+          builder: (context) => ResultPage(
+            result: result,
+          ),
+        ))
+            .then((value) {
+          setState(() {});
+        });
+
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 217, 138, 231),
       body: SafeArea(
-        child: Column(
+        child:  index < 10 ?  Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
@@ -25,12 +61,12 @@ class _TesPageState extends State<TesPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '1/10',
+                    '${index + 1} / ${widget.questionModel.data.length.toString()}',
                     style: GoogleFonts.montserrat(
                         fontSize: 18, color: Colors.white),
                   ),
                   Text(
-                    'andrew',
+                    widget.username,
                     style: GoogleFonts.montserrat(
                         fontSize: 18, color: Colors.white),
                   ),
@@ -47,14 +83,23 @@ class _TesPageState extends State<TesPage> {
                 initialPosition: 0,
                 duration: 60,
                 text: 'detik',
-                onComplete: () => null,
+                onComplete: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(
+                          builder: (context) => ResultPage(
+                                result: result,
+                              )))
+                      .then((value) {
+                    setState(() {});
+                  });
+                },
               ),
             ),
             const SizedBox(height: 50),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                'Warna Langit Sangat Cerah Adalah',
+                widget.questionModel.data[index].question,
                 style: GoogleFonts.montserrat(
                   fontSize: 22,
                   color: Colors.white,
@@ -65,39 +110,49 @@ class _TesPageState extends State<TesPage> {
             const SizedBox(height: 50),
             GestureDetector(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ResultPage(),
-                ));
+                // Navigator.of(context).push(MaterialPageRoute(
+                //   builder: (context) => ResultPage(),
+                // ));
+                navigate('a');
               },
               child: OptionWidget(
                 optionChar: "A",
-                optionDetail: "Biru",
+                optionDetail: widget.questionModel.data[index].optionA,
                 color: Colors.red,
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                navigate('b');
+              },
               child: OptionWidget(
                 optionChar: "B",
-                optionDetail: "Merah",
+                optionDetail: widget.questionModel.data[index].optionB,
                 color: Colors.green,
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                navigate('c');
+              },
               child: OptionWidget(
                 optionChar: "C",
-                optionDetail: "Putih",
+                optionDetail: widget.questionModel.data[index].optionC,
                 color: Colors.blue,
               ),
             ),
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                navigate('d');
+              },
               child: OptionWidget(
-                  optionChar: "D", optionDetail: "Hitam", color: Colors.grey),
+                optionChar: "D",
+                optionDetail: widget.questionModel.data[index].optionD,
+                color: Colors.grey,
+              ),
             ),
           ],
-        ),
+        ) : SizedBox(),
       ),
     );
   }
